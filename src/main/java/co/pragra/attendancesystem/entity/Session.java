@@ -19,11 +19,11 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "SESSION_DATE")
+    @Column(name = "SESSION_DATE", nullable = false)
     private Date sessionDate;
-    @Column(name = "START_TIME")
+    @Column(name = "START_TIME", nullable = false)
     private Time startTime;
-    @Column(name = "END_TIME")
+    @Column(name = "END_TIME", nullable = false)
     private Time endTime;
     @ManyToMany
     private List<Student> attendedStudents;
