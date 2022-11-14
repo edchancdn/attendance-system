@@ -25,8 +25,10 @@ public class Cohort {
     private Date startDate;
     @Column(name = "END_DATE")
     private Date endDate;
-    @ManyToMany
+
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Student> students;
-    @ManyToMany
+
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Session> sessions;
 }
