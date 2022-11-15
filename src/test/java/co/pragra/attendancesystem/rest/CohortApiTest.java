@@ -53,7 +53,7 @@ public class CohortApiTest {
     @Test
     @Order(2)
     void findCohortById() {
-        Assertions.assertTrue(controller.findCohortById(1).isPresent());
+        Assertions.assertTrue(controller.findCohortById(2).isPresent());
     }
 
     @Test
@@ -74,7 +74,7 @@ public class CohortApiTest {
     @Test
     @Order(5)
     void findCohortByName() {
-        Assertions.assertTrue(controller.findCohortByName("April-2022").getName().equals("April-2022"));
+        Assertions.assertTrue(controller.findCohortByName("April-2022").size() >= 1 );
     }
 
     @Test

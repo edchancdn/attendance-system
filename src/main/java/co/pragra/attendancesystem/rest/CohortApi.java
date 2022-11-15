@@ -66,7 +66,7 @@ public class CohortApi {
     }
 
     @GetMapping("api/cohort/name/{name}")
-    public Cohort findCohortByName(@PathVariable String name){
+    public List<Cohort> findCohortByName(@PathVariable String name){
         return repo.findCohortByName(name);
     }
 
