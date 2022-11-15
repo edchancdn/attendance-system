@@ -18,20 +18,20 @@ public class StudentApiTest {
     private StudentRepo repo;
     @Autowired
     private StudentApi api;
-    private List<Student> tData = new ArrayList<>();
     private Student tStudent = new Student();
-    // Constant test data
     private static final String T_LASTNAME = "Smithfortesting";
-    private static final String T_FIRSTNAME = "John";
     private static final String U_FIRSTNAME = "Frank";
 
     @BeforeAll
     public void setUp() {
+        System.out.println("Unit test started for StudentApi.");
+        System.out.println("Populating test data...");
         Student newSt = new Student().builder()
                 .lastName(T_LASTNAME)
-                .firstName(T_FIRSTNAME).build();
+                .firstName("John").build();
         tStudent = repo.save(newSt);
-        tData = repo.findAll();
+        System.out.println("Test data populated.");
+        System.out.println("Running tests...");
     }
 
     @Test
@@ -71,5 +71,13 @@ public class StudentApiTest {
     }
 
     @AfterAll
-    public void tearDown() {}
+    public void tearDown() {
+        System.out.println("Tests completed.");
+        System.out.println("Clearing test data...");
+        if (repo.findById(tStudent.getId()).isPresent()) {
+            repo.deleteById(tStudent.getId());
+        }
+        System.out.println("Test data cleared.");
+        System.out.println("Unit test ended for StudentApi.");
+    }
 }
