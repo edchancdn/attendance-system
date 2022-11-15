@@ -16,8 +16,8 @@ public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "LAST_NAME")
+    @Column(name = "LAST_NAME", nullable = false)
     private String lastName;
-    @Column(name = "FIRST_NAME")
+    @Column(name = "FIRST_NAME", nullable = false)
     private String firstName;
 }

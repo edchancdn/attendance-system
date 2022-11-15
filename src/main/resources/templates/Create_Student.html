@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeLeaf.org" lang="en">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+            <h1 class="text-center">Create New Student</h1>
+            <div class="card-body">
+                <form th:action="@{/students}" th:object="${student}" method="post">
+                    <div class="form-group">
+                        <label>Student First Name</label>
+                        <input
+                                type="text"
+                                name="firstName"
+                                th:field="*{firstName}"
+                                class="form-control"
+                                placeholder="Enter the student First Name"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Student Last Name</label>
+                        <input
+                                type="text"
+                                name="lastName"
+                                th:field="*{lastName}"
+                                class="form-control"
+                                placeholder="Enter the student Last Name"/>
+                    </div>
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-primary">
+                            Submit
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

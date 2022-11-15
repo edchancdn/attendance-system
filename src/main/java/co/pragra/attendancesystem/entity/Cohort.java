@@ -18,12 +18,13 @@ public class Cohort {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(nullable = false)
     private String name;
-    @Column(name = "COURSE_NAME")
+    @Column(name = "COURSE_NAME", nullable = false)
     private String courseName;
-    @Column(name = "START_DATE")
+    @Column(name = "START_DATE", nullable = false)
     private Date startDate;
-    @Column(name = "END_DATE")
+    @Column(name = "END_DATE", nullable = false)
     private Date endDate;
 
     @ManyToMany(cascade = CascadeType.ALL)

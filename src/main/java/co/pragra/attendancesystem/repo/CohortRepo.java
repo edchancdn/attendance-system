@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CohortRepo extends JpaRepository<Cohort, Long> {
+
+    Cohort findCohortByName(String name);
+
 }
