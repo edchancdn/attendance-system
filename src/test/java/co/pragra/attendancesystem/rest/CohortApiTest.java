@@ -1,8 +1,8 @@
-package co.pragra.attendancesystem.controller;
+package co.pragra.attendancesystem.rest;
 
-import co.pragra.attendancesystem.controller.CohortController;
 import co.pragra.attendancesystem.entity.Cohort;
 import co.pragra.attendancesystem.repo.CohortRepo;
+import co.pragra.attendancesystem.rest.CohortApi;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,13 +13,13 @@ import java.util.List;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CohortControllerTest {
+public class CohortApiTest {
 
     @Autowired
     private  CohortRepo repo;
 
     @Autowired
-    private CohortController controller;
+    private CohortApi controller;
 
 
     private Cohort cohort1;

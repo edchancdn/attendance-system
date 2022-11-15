@@ -9,7 +9,7 @@ spring:
       enabled: true
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
     show-sql: true
   thymeleaf:
     check-template-location: false

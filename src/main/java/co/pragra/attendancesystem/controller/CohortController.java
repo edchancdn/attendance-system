@@ -1,18 +1,15 @@
 package co.pragra.attendancesystem.controller;
-
 import co.pragra.attendancesystem.entity.Cohort;
 import co.pragra.attendancesystem.repo.CohortRepo;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
 
 @Controller
-@Slf4j
 public class CohortController {
+
 
     @Autowired
     private CohortRepo repo;
@@ -21,55 +18,42 @@ public class CohortController {
         this.repo = repo;
     }
 
-    @PostMapping("api/cohort")
-    public Cohort createCohort(@RequestBody Cohort cohort){
-        return repo.save(cohort);
+    @GetMapping("/cohorts")
+    public String findAllCohort(Model model){
+        model.addAttribute("cohorts", repo.findAll());
+        return "cohorts";
     }
 
-    @GetMapping("/api/cohort/{id}")
-    public Optional<Cohort> findCohortById(@PathVariable long id){
-        try{
-            Optional<Cohort> byId = repo.findById(id);
-            return byId;
-        }catch(NullPointerException e){
-            e.getMessage();
-            log.info("Couldn't find Cohort with Id: [{}] ", id);
-            log.error("An error has occurred.");
-        }
-        return null;
+    @GetMapping("/cohort/new")
+    public String createNewCohort(Model model){
+        model.addAttribute("cohort", new Cohort());
+        return "Create_cohort";
     }
 
-    @GetMapping("api/cohort")
-    public List<Cohort> findAllCohort(){
-        return repo.findAll();
-    }
-
-    @DeleteMapping("api/cohort/delete/{id}")
-    public Cohort deleteCohortById(@PathVariable long id){
-        try{
-            Optional<Cohort> byId = repo.findById(id);
-            if(byId.isPresent()){
-                repo.deleteById(id);
-                log.info("Cohort with Id: [{}] has been deleted successfully.", id);
-                return byId.get();
-            }
-        }catch(NullPointerException e){
-            e.getMessage();
-            log.info("Couldn't find Cohort with Id: [{}] ", id);
-            log.error("An error has occurred.");
-        }
-        return null;
-    }
-
-    @PutMapping("api/cohort")
-    public Cohort updateCohort(@RequestBody Cohort cohort){
-        return repo.save(cohort);
-    }
-
-    @GetMapping("api/cohort/name/{name}")
-    public Cohort findCohortByName(@PathVariable String name){
-        return repo.findCohortByName(name);
+    @PostMapping("cohorts")
+    public String savingCohort(@ModelAttribute Cohort cohort){
+        repo.save(cohort);
+        return "redirect:/cohorts";
     }
 
 
+    @GetMapping("/cohorts/edit/{id}")
+    public String editCohortById(@PathVariable long id, Model model){
+        model.addAttribute("cohort", repo.findById(id).get());
+        return "Edit_Cohort";
+    }
+
+    @PostMapping("cohorts/edit/{id}")
+    public String editCohortById(@ModelAttribute Cohort cohort, Model model){
+        repo.save(cohort);
+        model.addAttribute("cohorts", repo.findAll());
+        return "redirect:/cohorts";
+    }
+
+
+    @GetMapping("/cohorts/delete/{id}")
+    public String deleteCohortById(@PathVariable long id){
+        repo.deleteById(id);
+        return "redirect:/cohorts";
+    }
 }
