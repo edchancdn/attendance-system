@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import org.springframework.format.annotation.DateTimeFormat;
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -23,8 +23,10 @@ public class Cohort {
     @Column(name = "COURSE_NAME", nullable = false)
     private String courseName;
     @Column(name = "START_DATE", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date startDate;
     @Column(name = "END_DATE", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
     @ManyToMany
     private List<Student> students;

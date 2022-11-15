@@ -7,29 +7,24 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link rel="stylesheet" th:href="@{css/students.css}"/>
-  <title>Attendance Management System</title>
+
+  <!--        Add css file here in case you want-->
+  <link rel="stylesheet" th:href="@{css/cohorts.css}"/>
+  <title>Cohort Management System</title>
 </head>
 <body>
 <!--start of navbar-->
 <nav class="navbar navbar-expand-lg navbar-light bg-warning">
-  <a class="navbar-brand" th:href="@{/students}">Student Management</a>
+  <a class="navbar-brand" th:href="@{/cohorts}">Cohort Management</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-
-<!--    mapping direction for the navbarlinks such as Cohort Managemenent,Session Management, Attendance of Session is attached here, need to create it href-->
-<!--    <div class="navbar-nav">-->
-<!--      <a class="nav-item nav-link active" th:href="@{/cohorts}">Cohort Managemenent <span class="sr-only">(current)</span></a>-->
-<!--      <a class="nav-item nav-link" th:href="@{/sessions}">Session Management</a>-->
-<!--      <a class="nav-item nav-link" th:href="@{/attendances}"> Attendance of Session </a>-->
-<!--    </div>-->
-
     <div class="navbar-nav">
-      <a class="nav-item nav-link active" th:href="@{/cohorts}">Cohort Managemenent <span class="sr-only">(current)</span></a>
+      <a class="nav-item nav-link active" th:href="@{/students}">Student Management <span class="sr-only">(current)</span></a>
       <a class="nav-item nav-link" th:href="@{/#}">Session Management</a>
       <a class="nav-item nav-link" th:href="@{/#}"> Attendance of Session </a>
+
     </div>
   </div>
 </nav>
@@ -38,7 +33,7 @@
 <div class="row">
   <div class="col-lg-3">
     <!--        need to handle this method in student controller while adding new student-->
-    <a th:href ="@{/students/new}" class="btn btn-primary btn-sm mb-3" id="addButton"> Add Student</a>
+    <a th:href ="@{/cohort/new}" class="btn btn-primary btn-sm mb-3" id="addButton"> Add Cohort</a>
   </div>
 </div>
 
@@ -48,19 +43,27 @@
   <thead class="thead-dark">
   <tr>
     <th scope="col">Id</th>
-    <th scope="col">First Name</th>
-    <th scope="col">Last Name</th>
+    <th scope="col">Name of Cohort</th>
+    <th scope="col">Course</th>
+    <th scope="col">Start Date </th>
+    <th scope="col">End Date </th>
     <th scope="col">Action</th>
   </tr>
   </thead>
   <tbody>
-  <tr th:each="student: ${students}">
-    <td th:text = "${student.id}"/>
-    <td th:text = "${student.firstName}"/>
-    <td th:text = "${student.lastName}"/>
+  <tr th:each="cohort: ${cohorts}">
+    <td th:text = "${cohort.id}"/>
+    <td th:text = "${cohort.name}"/>
+    <td th:text = "${cohort.courseName}"/>
+    <td th:text="${#dates.format(cohort.startDate, 'dd-MMM-yyyy')}"/>
+    <td th:text="${#dates.format(cohort.endDate, 'dd-MMM-yyyy')}"/>
+
+<!--        <td th:text = "${cohort.startDate}"/>-->
+<!--        <td th:text = "${cohort.endDate}"/>-->
+
     <td>
-      <a th:href="@{/students/edit/{id}(id=${student.id})}" class="btn btn-primary"> Update</a>
-      <a th:href="@{/students/delete/{id}(id=${student.id})}" class="btn btn-danger"> Delete</a>
+      <a th:href="@{/cohort/edit/{id}(id=${cohort.id})}" class="btn btn-primary"> Update</a>
+      <a th:href="@{/cohort/delete/{id}(id=${cohort.id})}" class="btn btn-danger"> Delete</a>
     </td>
   </tr>
   </tbody>
