@@ -28,8 +28,10 @@ public class Cohort {
     @Column(name = "END_DATE", nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
+
     @ManyToMany
     private List<Student> students;
+
     @ManyToMany
     private List<Session> sessions;
 }
