@@ -26,6 +26,6 @@ public class Session {
     @Column(name = "END_TIME", nullable = false)
     private Time endTime;
     // When running the unit test - use (fetch = FetchType.EAGER)
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     private List<Student> attendedStudents;
 }

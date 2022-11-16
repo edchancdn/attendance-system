@@ -5,8 +5,8 @@ import co.pragra.attendancesystem.repo.StudentRepo;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
@@ -14,8 +14,6 @@ import java.util.List;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StudentApiTest {
 
-    @Autowired
-    private StudentRepo repo;
     @Autowired
     private StudentApi api;
     private Student tStudent = new Student();
@@ -25,59 +23,71 @@ public class StudentApiTest {
     @BeforeAll
     public void setUp() {
         System.out.println("Unit test started for StudentApi.");
-        System.out.println("Populating test data...");
-        Student newSt = new Student().builder()
-                .lastName(T_LASTNAME)
-                .firstName("John").build();
-        tStudent = repo.save(newSt);
-        System.out.println("Test data populated.");
         System.out.println("Running tests...");
     }
 
     @Test
     @Order(1)
-    public void testGetAllStudents() {
-        Assertions.assertTrue(api.getAllStudents().size() >= 1);
+    public void testCreateStudent() {
+        Student student = new Student().builder()
+                .lastName(T_LASTNAME)
+                .firstName("John").build();
+        ResponseEntity<?> createdStudent = api.createStudent(student);
+        Assertions.assertTrue(createdStudent.getStatusCodeValue() == 200);
+        tStudent = (Student) createdStudent.getBody();
+        Assertions.assertTrue(tStudent.getLastName().equals(T_LASTNAME));
     }
 
     @Test
     @Order(2)
-    public void testGetStudentById() {
-        Assertions.assertTrue(api.getStudentById(tStudent.getId()).isPresent());
+    public void testGetAllStudents() {
+        ResponseEntity<?> allStudents = api.getAllStudents();
+        Assertions.assertTrue(allStudents.getStatusCodeValue() == 200);
     }
 
     @Test
     @Order(3)
-    public void testGetStudentByLastName() {
-        Assertions.assertTrue(api.getStudentByLastName(T_LASTNAME).size() >= 1);
+    public void testGetStudentById() {
+        ResponseEntity<?> studentById = api.getStudentById(tStudent.getId());
+        Assertions.assertTrue(studentById.getStatusCodeValue() == 200);
+        Student responseBody = (Student) studentById.getBody();
+        Assertions.assertTrue(responseBody.getId() == tStudent.getId());
     }
 
     @Test
     @Order(4)
+    public void testGetStudentByLastName() {
+        ResponseEntity<?> studentByLastName = api.getStudentByLastName(T_LASTNAME);
+        Assertions.assertTrue(studentByLastName.getStatusCodeValue() == 200);
+        List<Student> responseBody = (List<Student>) studentByLastName.getBody();
+        Assertions.assertTrue(responseBody.get(0).getLastName().equals(T_LASTNAME));
+    }
+
+    @Test
+    @Order(5)
     public void testUpdateStudent() {
         Student student = new Student().builder()
                 .id(tStudent.getId())
                 .lastName(tStudent.getLastName())
                 .firstName(U_FIRSTNAME).build();
-        Student updatedStudent = api.updateStudent(student);
-        Assertions.assertTrue(updatedStudent.getFirstName() == U_FIRSTNAME);
+        ResponseEntity<?> updatedStudent = api.updateStudent(student);
+        Assertions.assertTrue(updatedStudent.getStatusCodeValue() == 200);
+        Student responseBody = (Student) updatedStudent.getBody();
+        Assertions.assertTrue(responseBody.getFirstName().equals(U_FIRSTNAME));
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     public void testDeleteStudentById() {
-        api.deleteStudentById(tStudent.getId());
-        Assertions.assertFalse(api.getStudentById(tStudent.getId()).isPresent());
+        ResponseEntity<?> deleteStudentById = api.deleteStudentById(tStudent.getId());
+        Assertions.assertTrue(deleteStudentById.getStatusCodeValue() == 200);
+        ResponseEntity<?> studentById = api.getStudentById(tStudent.getId());
+        Assertions.assertTrue(studentById.getStatusCodeValue() == 404);
     }
 
     @AfterAll
     public void tearDown() {
         System.out.println("Tests completed.");
-        System.out.println("Clearing test data...");
-        if (repo.findById(tStudent.getId()).isPresent()) {
-            repo.deleteById(tStudent.getId());
-        }
-        System.out.println("Test data cleared.");
-        System.out.println("Unit test ended for StudentApi.");
+        System.out.println("Unit test ended for SessionApi.");
     }
 }
