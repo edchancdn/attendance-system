@@ -1,11 +1,14 @@
 package co.pragra.attendancesystem.rest;
 
+import co.pragra.attendancesystem.dto.ErrorResponse;
 import co.pragra.attendancesystem.entity.Cohort;
 import co.pragra.attendancesystem.repo.CohortRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,55 +23,134 @@ public class CohortApi {
         this.repo = repo;
     }
 
-    @PostMapping("api/cohort")
-    public Cohort createCohort(@RequestBody Cohort cohort){
-        return repo.save(cohort);
+    @GetMapping("/api/cohort")
+    public ResponseEntity<?> getAllCohort(){
+        List<Cohort> findAll = repo.findAll();
+        if (findAll.size() >= 1) {
+            return ResponseEntity.status(200).body(findAll);
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C1")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message("No cohort found in database")
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
     }
 
     @GetMapping("/api/cohort/{id}")
-    public Optional<Cohort> findCohortById(@PathVariable long id){
-        try{
-            Optional<Cohort> byId = repo.findById(id);
-            return byId;
-        }catch(NullPointerException e){
-            e.getMessage();
-            log.info("Couldn't find Cohort with Id: [{}] ", id);
-            log.error("An error has occurred.");
+    public ResponseEntity<?> findCohortById(@PathVariable long id){
+        Optional<Cohort> cohortOptional = repo.findById(id);
+        if (cohortOptional.isPresent()) {
+            return ResponseEntity.status(200).body(cohortOptional.get());
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C2")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Cohort with ID = [%s] not found in database", id))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
         }
-        return null;
-    }
-
-    @GetMapping("api/cohort")
-    public List<Cohort> findAllCohort(){
-        return repo.findAll();
-    }
-
-    @DeleteMapping("api/cohort/delete/{id}")
-    public Cohort deleteCohortById(@PathVariable long id){
-        try{
-            Optional<Cohort> byId = repo.findById(id);
-            if(byId.isPresent()){
-                repo.deleteById(id);
-                log.info("Cohort with Id: [{}] has been deleted successfully.", id);
-                return byId.get();
-            }
-        }catch(NullPointerException e){
-            e.getMessage();
-            log.info("Couldn't find Cohort with Id: [{}] ", id);
-            log.error("An error has occurred.");
-        }
-        return null;
-    }
-
-    @PutMapping("api/cohort")
-    public Cohort updateCohort(@RequestBody Cohort cohort){
-        return repo.save(cohort);
     }
 
     @GetMapping("api/cohort/name/{name}")
-    public List<Cohort> findCohortByName(@PathVariable String name){
-        return repo.findCohortByName(name);
+    public ResponseEntity<?> findCohortByName(@PathVariable String name){
+        List<Cohort> list = repo.findCohortByName(name);
+        if (list.size() >= 1) {
+            return ResponseEntity.status(200).body(list);
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C3")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Cohort with name = [%s] not found in database", name))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
     }
 
+    @PostMapping("api/cohort")
+    public ResponseEntity<?> createCohort(@RequestBody Cohort cohort){
+        try {
+            Cohort save = repo.save(cohort);
+            return ResponseEntity.status(200).body(save);
+        } catch (Exception e) {
+            // LOG exception
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C4")
+                    .errorCode(500)
+                    .dateTime(new Date())
+                    .message(String.format("Cohort not created"))
+                    .build();
+            return ResponseEntity.status(500).body(errorR);
+        }
+    }
 
+    @PutMapping("api/cohort")
+    public ResponseEntity<?> updateCohort(@RequestBody Cohort cohort){
+        Optional<Cohort> byId = repo.findById(cohort.getId());
+        if (byId.isPresent()) {
+            try {
+                Cohort save = repo.save(cohort);
+                return ResponseEntity.status(200).body(save);
+            } catch (Exception e) {
+                // LOG exception
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-C5")
+                        .errorCode(500)
+                        .dateTime(new Date())
+                        .message(String.format("Cohort not updated"))
+                        .build();
+                return ResponseEntity.status(500).body(errorR);
+            }
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C5")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Cohort with ID = [%s] not found in database", cohort.getId()))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
+    }
+
+    @DeleteMapping("api/cohort/{id}")
+    public ResponseEntity<?> deleteCohortById(@PathVariable long id){
+        Optional<Cohort> byId = repo.findById(id);
+        if (byId.isPresent()) {
+            try {
+                repo.deleteById(id);
+                if (!repo.findById(id).isPresent()) {
+                    return ResponseEntity.status(200).body(byId.get());
+                } else {
+                    ErrorResponse errorR = ErrorResponse.builder()
+                            .appId("AMS-C6")
+                            .errorCode(500)
+                            .dateTime(new Date())
+                            .message(String.format("Cohort not deleted"))
+                            .build();
+                    return ResponseEntity.status(500).body(errorR);
+                }
+            } catch (Exception e) {
+                // LOG exception
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-C6")
+                        .errorCode(500)
+                        .dateTime(new Date())
+                        .message(String.format("Cohort not deleted"))
+                        .build();
+                return ResponseEntity.status(500).body(errorR);
+            }
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C6")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Cohort with ID = [%s] not found in database", id))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
+    }
 }

@@ -7,6 +7,7 @@ import co.pragra.attendancesystem.repo.StudentRepo;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
 
 import java.sql.Time;
 import java.util.*;
@@ -64,13 +65,17 @@ public class SessionApiTest {
     @Test
     @Order(1)
     public void testGetAllSessions() {
-        Assertions.assertTrue(api.getAllSessions().size() >= 1);
+        ResponseEntity<?> allStudents = api.getAllSessions();
+        Assertions.assertTrue(allStudents.getStatusCodeValue() == 200);
     }
 
     @Test
     @Order(2)
     public void testGetSessionById() {
-        Assertions.assertTrue(api.getSessionById(tSession.getId()).isPresent());
+        ResponseEntity<?> sessionById = api.getSessionById(tSession.getId());
+        Assertions.assertTrue(sessionById.getStatusCodeValue() == 200);
+        Session responseBody = (Session) sessionById.getBody();
+        Assertions.assertTrue(responseBody.getId() == tSession.getId());
     }
 
     @Test
@@ -83,8 +88,10 @@ public class SessionApiTest {
                 .endTime(tSession.getEndTime())
                 .attendedStudents(tSession.getAttendedStudents())
                 .build();
-        Session updatedSession = api.updateSession(session);
-        Assertions.assertTrue(updatedSession.getSessionDate().equals(T_UPDATED_DATE));
+        ResponseEntity<?> updatedSession = api.updateSession(session);
+        Assertions.assertTrue(updatedSession.getStatusCodeValue() == 200);
+        Session responseBody = (Session) updatedSession.getBody();
+        Assertions.assertTrue(responseBody.getSessionDate().equals(T_UPDATED_DATE));
     }
 
     @Test
@@ -93,8 +100,10 @@ public class SessionApiTest {
         Optional<Student> byId = studentRepo.findById(studentId3);
         List<Long> studentIds = new ArrayList<>();
         studentIds.add(studentId3);
-        Session updatedSession = api.addStudentToSession(studentIds, tSession.getId());
-        Assertions.assertTrue(updatedSession.getAttendedStudents().contains(byId.get()));
+        ResponseEntity<?> updatedSession = api.addStudentToSession(studentIds, tSession.getId());
+        Assertions.assertTrue(updatedSession.getStatusCodeValue() == 200);
+        Session responseBody = (Session) updatedSession.getBody();
+        Assertions.assertTrue(responseBody.getAttendedStudents().contains(byId.get()));
     }
 
     @Test
@@ -103,15 +112,21 @@ public class SessionApiTest {
         Optional<Student> byId = studentRepo.findById(studentId3);
         List<Long> studentIds = new ArrayList<>();
         studentIds.add(studentId3);
-        Session updatedSession = api.deleteStudentFromSession(studentIds, tSession.getId());
-        Assertions.assertFalse(updatedSession.getAttendedStudents().contains(byId.get()));
+        // When running the unit test - use (fetch = FetchType.EAGER) in Session entity
+        ResponseEntity<?> updatedSession = api.deleteStudentFromSession(studentIds, tSession.getId());
+        Assertions.assertTrue(updatedSession.getStatusCodeValue() == 200);
+        Session responseBody = (Session) updatedSession.getBody();
+        Assertions.assertFalse(responseBody.getAttendedStudents().contains(byId.get()));
     }
 
     @Test
     @Order(6)
     public void testDeleteSessionById() {
-        api.deleteSessionById(tSession.getId());
-        Assertions.assertEquals(null, api.getSessionById(tSession.getId()));
+        // When running the unit test - use (fetch = FetchType.EAGER) in Session entity
+        ResponseEntity<?> deleteSessionById = api.deleteSessionById(tSession.getId());
+        Assertions.assertTrue(deleteSessionById.getStatusCodeValue() == 200);
+        ResponseEntity<?> sessionById = api.getSessionById(tSession.getId());
+        Assertions.assertTrue(sessionById.getStatusCodeValue() == 404);
     }
 
     @AfterAll
