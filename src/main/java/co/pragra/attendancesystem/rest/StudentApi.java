@@ -19,50 +19,55 @@ public class StudentApi {
     }
 
     @GetMapping("/api/student")
-    public ResponseEntity<?> getAllStudents() {
-        List<Student> findAll = repo.findAll();
-        if (findAll.size() >= 1) {
-            return ResponseEntity.status(200).body(findAll);
-        } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-S1")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message("No student found in database")
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
-        }
-    }
+    public ResponseEntity<?> getStudent(
+            @RequestParam Optional<Long> id,
+            @RequestParam Optional<String> lastname) {
 
-    @GetMapping("/api/student/{id}")
-    public ResponseEntity<?> getStudentById(@PathVariable Long id) {
-        Optional<Student> studentOptional = repo.findById(id);
-        if (studentOptional.isPresent()) {
-            return ResponseEntity.status(200).body(studentOptional.get());
-        } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-S2")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Student with ID = [%s] not found in database", id))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
-        }
-    }
+        // ID is prioritized
+        // If both ID and Lastname have values, then only search by ID
+        if (id.isPresent()) {
+            Optional<Student> studentOptional = repo.findById(id.get());
+            if (studentOptional.isPresent()) {
+                return ResponseEntity.status(200).body(studentOptional.get());
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S2")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Student with ID = [%s] not found in database", id))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
 
-    @GetMapping("/api/student/lastname/{lastname}")
-    public ResponseEntity<?> getStudentByLastName(@PathVariable String lastname) {
-        List<Student> list = repo.searchStudentByLastName(lastname);
-        if (list.size() >= 1) {
-            return ResponseEntity.status(200).body(list);
+            // Lastname is secondary
+        } else if (lastname.isPresent()) {
+            List<Student> list = repo.searchStudentByLastName(lastname.get());
+            if (list.size() >= 1) {
+                return ResponseEntity.status(200).body(list);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S3")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Student with lastname = [%s] not found in database", lastname))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
+
+            // Fallback to search all
         } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-S3")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Student with lastname = [%s] not found in database", lastname))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
+            List<Student> findAll = repo.findAll();
+            if (findAll.size() >= 1) {
+                return ResponseEntity.status(200).body(findAll);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S1")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message("No student found in database")
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
         }
     }
 

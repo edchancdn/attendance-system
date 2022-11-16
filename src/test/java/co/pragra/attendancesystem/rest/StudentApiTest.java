@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -41,14 +42,14 @@ public class StudentApiTest {
     @Test
     @Order(2)
     public void testGetAllStudents() {
-        ResponseEntity<?> allStudents = api.getAllStudents();
+        ResponseEntity<?> allStudents = api.getStudent(Optional.empty(), Optional.empty());
         Assertions.assertTrue(allStudents.getStatusCodeValue() == 200);
     }
 
     @Test
     @Order(3)
     public void testGetStudentById() {
-        ResponseEntity<?> studentById = api.getStudentById(tStudent.getId());
+        ResponseEntity<?> studentById = api.getStudent(Optional.ofNullable(tStudent.getId()), Optional.empty());
         Assertions.assertTrue(studentById.getStatusCodeValue() == 200);
         Student responseBody = (Student) studentById.getBody();
         Assertions.assertTrue(responseBody.getId() == tStudent.getId());
@@ -57,7 +58,7 @@ public class StudentApiTest {
     @Test
     @Order(4)
     public void testGetStudentByLastName() {
-        ResponseEntity<?> studentByLastName = api.getStudentByLastName(T_LASTNAME);
+        ResponseEntity<?> studentByLastName = api.getStudent(Optional.empty(), Optional.ofNullable(T_LASTNAME));
         Assertions.assertTrue(studentByLastName.getStatusCodeValue() == 200);
         List<Student> responseBody = (List<Student>) studentByLastName.getBody();
         Assertions.assertTrue(responseBody.get(0).getLastName().equals(T_LASTNAME));
@@ -81,7 +82,7 @@ public class StudentApiTest {
     public void testDeleteStudentById() {
         ResponseEntity<?> deleteStudentById = api.deleteStudentById(tStudent.getId());
         Assertions.assertTrue(deleteStudentById.getStatusCodeValue() == 200);
-        ResponseEntity<?> studentById = api.getStudentById(tStudent.getId());
+        ResponseEntity<?> studentById = api.getStudent(Optional.ofNullable(tStudent.getId()), null);
         Assertions.assertTrue(studentById.getStatusCodeValue() == 404);
     }
 

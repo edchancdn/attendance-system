@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.sql.Time;
@@ -26,6 +27,6 @@ public class Session {
     @Column(name = "END_TIME", nullable = false)
     private Time endTime;
     // When running the unit test - use (fetch = FetchType.EAGER)
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     private List<Student> attendedStudents;
 }

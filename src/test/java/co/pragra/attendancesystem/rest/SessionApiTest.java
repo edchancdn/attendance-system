@@ -65,14 +65,14 @@ public class SessionApiTest {
     @Test
     @Order(1)
     public void testGetAllSessions() {
-        ResponseEntity<?> allStudents = api.getAllSessions();
+        ResponseEntity<?> allStudents = api.getSession(Optional.empty(), Optional.empty());
         Assertions.assertTrue(allStudents.getStatusCodeValue() == 200);
     }
 
     @Test
     @Order(2)
     public void testGetSessionById() {
-        ResponseEntity<?> sessionById = api.getSessionById(tSession.getId());
+        ResponseEntity<?> sessionById = api.getSession(Optional.ofNullable(tSession.getId()), Optional.empty());
         Assertions.assertTrue(sessionById.getStatusCodeValue() == 200);
         Session responseBody = (Session) sessionById.getBody();
         Assertions.assertTrue(responseBody.getId() == tSession.getId());
@@ -125,7 +125,7 @@ public class SessionApiTest {
         // When running the unit test - use (fetch = FetchType.EAGER) in Session entity
         ResponseEntity<?> deleteSessionById = api.deleteSessionById(tSession.getId());
         Assertions.assertTrue(deleteSessionById.getStatusCodeValue() == 200);
-        ResponseEntity<?> sessionById = api.getSessionById(tSession.getId());
+        ResponseEntity<?> sessionById = api.getSession(Optional.ofNullable(tSession.getId()), Optional.empty());
         Assertions.assertTrue(sessionById.getStatusCodeValue() == 404);
     }
 
