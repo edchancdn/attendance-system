@@ -20,26 +20,26 @@ public class SessionController {
 
     @GetMapping("/session")
     public String getAllSessionList(Model model){
-        model.addAttribute("session",sessionRepo.findAll());
+        model.addAttribute("sessions",sessionRepo.findAll());
         return "session";
     }
 
-    @GetMapping ("/session/new")
+    @GetMapping ("/sessions/new")
     public String createNewSession(Model model){
         //creating empty session
         Session session = new Session();
         // then to add data into that by using form
         model.addAttribute("session",session);
-        return "Create_Session";
+        return "create_Session";
     }
 
     //method for handling the data coming from post request inside Create_Student form
-    @PostMapping("/session")
+    @PostMapping("/sessions")
     public String savingSession(@ModelAttribute Session session){
         //now  our form is filled with data we get student in request back, but we still need to save inside database
         sessionRepo.save(session);
         //then returning the new view with created student
-        return "redirect:/session";
+        return "redirect:/sessions";
     }
 
 

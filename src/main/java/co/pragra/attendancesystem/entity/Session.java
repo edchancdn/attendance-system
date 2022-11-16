@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.sql.Time;
@@ -20,6 +21,7 @@ public class Session {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     @Column(name = "SESSION_DATE", nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date sessionDate;
     @Column(name = "START_TIME", nullable = false)
     private Time startTime;

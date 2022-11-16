@@ -30,7 +30,7 @@
 <div class="row">
     <div class="col-lg-3">
         <!--        need to handle this method in session controller while adding new session-->
-        <a th:href ="@{/session/new}" class="btn btn-primary btn-sm mb-3" id="addButton"> Add Session</a>
+        <a th:href ="@{/sessions/new}" class="btn btn-primary btn-sm mb-3" id="addButton"> Add Session</a>
     </div>
 </div>
 
@@ -46,14 +46,15 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="session: ${session}">
+    <tr th:each="session: ${sessions}">
         <td th:text = "${session.id}"/>
-        <td th:text = "${session.sessionDate}"/>
-        <td th:text = "${session.startTime}"/>
-        <td th:text = "${session.endTime}"/>
+<!--        <td th:text = "${session.sessionDate}"/>-->
+        <td th:text="${#dates.format(session.sessionDate, 'dd-MMM-yyyy')}"/>
+<!--        <td th:text = "${session.startTime}"/>-->
+<!--        <td th:text = "${session.endTime}"/>-->
         <td>
-            <a th:href="@{/session/edit/{id}(id=${session.id})}" class="btn btn-primary"> Update</a>
-            <a th:href="@{/session/delete/{id}(id=${session.id})}" class="btn btn-danger"> Delete</a>
+            <a th:href="@{/sessions/edit/{id}(id=${session.id})}" class="btn btn-primary"> Update</a>
+            <a th:href="@{/sessions/delete/{id}(id=${session.id})}" class="btn btn-danger"> Delete</a>
         </td>
     </tr>
     </tbody>
