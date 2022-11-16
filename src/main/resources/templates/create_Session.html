@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="https://www.thymeLeaf.org" lang="en">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Session Detials</title>
+</head>
+<body>
+<div class="container">
+  <div class="row">
+    <div class="col-lg-6 col-md-6 col-sm-6 container justify-content-center card">
+      <h1 class="text-center">Create New Session</h1>
+      <div class="card-body">
+        <form th:action="@{/session}" th:object="${session}" method="post">
+          <div class="form-group">
+            <label>Session Id</label>
+            <input
+                    type="text"
+                    name="Id"
+                    th:field="*{Id}"
+                    class="form-control"
+                    placeholder="Enter the session Id"/>
+          </div>
+
+          <div class="form-group">
+            <label for="start">Cohort Start Date:</label>
+            <input
+                    id="start"
+                    type="date"
+                    name="startDate"
+                    th:field="${session.startDate}"
+                    class="form-control"
+                    value="2022-06-01"
+                    min="2018-01-01"/>
+          </div>
+          <div class="form-group">
+            <label for="end"> Session startDate: </label>
+            <input
+                    id="end"
+                    type="date"
+                    name="endDate"
+                    th:field="${session.endDate}"
+                    class="form-control"
+                    value="2022-06-01"
+                    min="2018-01-01"/>
+          </div>
+          <div class="box-footer">
+            <button type="submit" class="btn btn-primary">
+              Submit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
