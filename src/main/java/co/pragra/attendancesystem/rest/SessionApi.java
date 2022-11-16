@@ -1,14 +1,11 @@
 package co.pragra.attendancesystem.rest;
 
-import co.pragra.attendancesystem.dto.ErrorResponse;
 import co.pragra.attendancesystem.entity.Session;
 import co.pragra.attendancesystem.entity.Student;
 import co.pragra.attendancesystem.repo.SessionRepo;
 import co.pragra.attendancesystem.repo.StudentRepo;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,112 +21,44 @@ public class SessionApi {
     }
 
     @GetMapping("/api/session")
-    public ResponseEntity<?> getAllSessions() {
-        List<Session> findAll = repo.findAll();
-        if (findAll.size() >= 1) {
-            return ResponseEntity.status(200).body(findAll);
-        } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X1")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message("No session found in database")
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
-        }
+    public List<Session> getAllSessions() {
+        return repo.findAll();
     }
 
     @GetMapping("/api/session/{id}")
-    public ResponseEntity<?> getSessionById(@PathVariable Long id) {
-        Optional<Session> sessionOptional = repo.findById(id);
-        if (sessionOptional.isPresent()) {
-            return ResponseEntity.status(200).body(sessionOptional.get());
+    public Optional<Session> getSessionById(@PathVariable Long id) {
+        Optional<Session> byId = repo.findById(id);
+        if (byId.isPresent()) {
+            return byId;
         } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X2")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Session with ID = [%s] not found in database", id))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
+            return null;
         }
     }
 
     @PostMapping("/api/session")
-    public ResponseEntity<?> createSession(@RequestBody Session session) {
-        try {
-            Session save = repo.save(session);
-            return ResponseEntity.status(200).body(save);
-        } catch (Exception e) {
-            // LOG exception
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X4")
-                    .errorCode(500)
-                    .dateTime(new Date())
-                    .message(String.format("Session not created"))
-                    .build();
-            return ResponseEntity.status(500).body(errorR);
-        }
+    public Session createSession(@RequestBody Session session) {
+        return repo.save(session);
     }
 
     @PutMapping("/api/session")
-    public ResponseEntity<?> updateSession(@RequestBody Session session) {
-        Optional<Session> byId = repo.findById(session.getId());
-        if (byId.isPresent()) {
-            try {
-                Session save = repo.save(session);
-                return ResponseEntity.status(200).body(save);
-            } catch (Exception e) {
-                // LOG exception
-                ErrorResponse errorR = ErrorResponse.builder()
-                        .appId("AMS-X4")
-                        .errorCode(500)
-                        .dateTime(new Date())
-                        .message(String.format("Session not updated"))
-                        .build();
-                return ResponseEntity.status(500).body(errorR);
-            }
-        } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X4")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Session with ID = [%s] not found in database", session.getId()))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
-        }
+    public Session updateSession(@RequestBody Session session) {
+        return repo.save(session);
     }
 
     @DeleteMapping("/api/session/{id}")
-    public ResponseEntity<?> deleteSessionById(@PathVariable Long id) {
+    public Session deleteSessionById(@PathVariable Long id) {
         Optional<Session> byId = repo.findById(id);
         if (byId.isPresent()) {
+            Session rSession = new Session();
+            rSession.setId(byId.get().getId());
+            rSession.setSessionDate(byId.get().getSessionDate());
+            rSession.setStartTime(byId.get().getStartTime());
+            rSession.setEndTime(byId.get().getEndTime());
+            rSession.setAttendedStudents(null);
             repo.deleteById(id);
-            if (!repo.findById(id).isPresent()) {
-                Session rSession = new Session();
-                rSession.setId(byId.get().getId());
-                rSession.setSessionDate(byId.get().getSessionDate());
-                rSession.setStartTime(byId.get().getStartTime());
-                rSession.setEndTime(byId.get().getEndTime());
-                rSession.setAttendedStudents(null);
-                return ResponseEntity.status(200).body(rSession);
-            } else {
-                ErrorResponse errorR = ErrorResponse.builder()
-                        .appId("AMS-X5")
-                        .errorCode(500)
-                        .dateTime(new Date())
-                        .message(String.format("Session not deleted"))
-                        .build();
-                return ResponseEntity.status(500).body(errorR);
-            }
+            return rSession;
         } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X5")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Session with ID = [%s] not found in database", id))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
+            return null;
         }
     }
 
@@ -138,7 +67,7 @@ public class SessionApi {
     Add the corresponding students into existing session.attendedStudents.
     */
     @PutMapping("/api/session/{sessionId}/student")
-    public ResponseEntity<?> addStudentToSession(@RequestBody List<Long> students, @PathVariable Long sessionId) {
+    public Session addStudentToSession(@RequestBody List<Long> students, @PathVariable Long sessionId) {
         // get the session to be updated
         Optional<Session> byId = repo.findById(sessionId);
         if (byId.isPresent()) {
@@ -158,36 +87,12 @@ public class SessionApi {
                     }
                 }
                 sessionToUpdate.setAttendedStudents(listToUpdate);
-                try {
-                    Session save = repo.save(sessionToUpdate);
-                    return ResponseEntity.status(200).body(save);
-                } catch (Exception e) {
-                    // LOG exception
-                    ErrorResponse errorR = ErrorResponse.builder()
-                            .appId("AMS-X6")
-                            .errorCode(500)
-                            .dateTime(new Date())
-                            .message(String.format("Student not added to session"))
-                            .build();
-                    return ResponseEntity.status(500).body(errorR);
-                }
+                return repo.save(sessionToUpdate);
             } else {
-                ErrorResponse errorR = ErrorResponse.builder()
-                        .appId("AMS-X6")
-                        .errorCode(204)
-                        .dateTime(new Date())
-                        .message(String.format("Empty students list provided"))
-                        .build();
-                return ResponseEntity.status(204).body(errorR);
+                return null;
             }
         } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X6")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Session with ID = [%s] not found in database", sessionId))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
+            return null;
         }
     }
 
@@ -196,7 +101,7 @@ public class SessionApi {
     Remove the corresponding students from existing session.attendedStudents
      */
     @DeleteMapping("/api/session/{sessionId}/student")
-    public ResponseEntity<?> deleteStudentFromSession(@RequestBody List<Long> students, @PathVariable Long sessionId) {
+    public Session deleteStudentFromSession(@RequestBody List<Long> students, @PathVariable Long sessionId) {
         // get the session to be updated
         Optional<Session> byId = repo.findById(sessionId);
         if (byId.isPresent()) {
@@ -216,36 +121,12 @@ public class SessionApi {
                     }
                 }
                 sessionToUpdate.setAttendedStudents(listToUpdate);
-                try {
-                    Session save = repo.save(sessionToUpdate);
-                    return ResponseEntity.status(200).body(save);
-                } catch (Exception e) {
-                    // LOG exception
-                    ErrorResponse errorR = ErrorResponse.builder()
-                            .appId("AMS-X7")
-                            .errorCode(500)
-                            .dateTime(new Date())
-                            .message(String.format("Student not removed from session"))
-                            .build();
-                    return ResponseEntity.status(500).body(errorR);
-                }
+                return repo.save(sessionToUpdate);
             } else {
-                ErrorResponse errorR = ErrorResponse.builder()
-                        .appId("AMS-X7")
-                        .errorCode(204)
-                        .dateTime(new Date())
-                        .message(String.format("Empty students list provided"))
-                        .build();
-                return ResponseEntity.status(204).body(errorR);
+                return null;
             }
         } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X7")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Session with ID = [%s] not found in database", sessionId))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
+            return null;
         }
     }
 }

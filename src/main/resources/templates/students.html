@@ -7,7 +7,7 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-  <link rel="stylesheet" th:href="@{css/students.css}"/>
+  <link rel="stylesheet" th:href="@{css/sessions.css}"/>
   <title>Attendance Management System</title>
 </head>
 <body>
@@ -27,10 +27,12 @@
 <!--    </div>-->
 
     <div class="navbar-nav">
-      <a class="nav-item nav-link active" th:href="@{/cohorts}">Cohort Managemenent <span class="sr-only">(current)</span></a>
-      <a class="nav-item nav-link" th:href="@{/#}">Session Management</a>
-      <a class="nav-item nav-link" th:href="@{/#}"> Attendance of Session </a>
+      <a class="nav-item nav-link active" th:href="@{/cohorts}">Cohort Managemenent<span class="sr-only">(current)</span></a>
+      <a class="nav-item nav-link" th:href="@{/session}">Session Management</a>
+      <a class="nav-item nav-link" th:href="@{/#}">Attendance of Session</a>
     </div>
+
+
   </div>
 </nav>
 <!--end of navbar-->

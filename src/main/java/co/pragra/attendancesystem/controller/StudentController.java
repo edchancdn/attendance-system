@@ -33,7 +33,6 @@ public class StudentController {
         return "Create_Student";
     }
 
-
     //method for handling the data coming from post request inside Create_Student form
     @PostMapping("/students")
     public String savingStudent(@ModelAttribute Student student){
