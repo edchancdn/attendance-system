@@ -5,6 +5,7 @@ import co.pragra.attendancesystem.entity.Session;
 import co.pragra.attendancesystem.entity.Student;
 import co.pragra.attendancesystem.repo.SessionRepo;
 import co.pragra.attendancesystem.repo.StudentRepo;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,34 +25,57 @@ public class SessionApi {
     }
 
     @GetMapping("/api/session")
-    public ResponseEntity<?> getAllSessions() {
-        List<Session> findAll = repo.findAll();
-        if (findAll.size() >= 1) {
-            return ResponseEntity.status(200).body(findAll);
-        } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X1")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message("No session found in database")
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
-        }
-    }
+    public ResponseEntity<?> getSession(
+            @RequestParam Optional<Long> id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<Date> sessionDate) {
 
-    @GetMapping("/api/session/{id}")
-    public ResponseEntity<?> getSessionById(@PathVariable Long id) {
-        Optional<Session> sessionOptional = repo.findById(id);
-        if (sessionOptional.isPresent()) {
-            return ResponseEntity.status(200).body(sessionOptional.get());
+        // ID is prioritized
+        // If both ID and session have values, then only search by ID
+        if (id.isPresent()) {
+            Optional<Session> sessionOptional = repo.findById(id.get());
+            if (sessionOptional.isPresent()) {
+                return ResponseEntity.status(200).body(sessionOptional.get());
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-X2")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Session with ID = [%s] not found in database", id))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
+
+            // Session date is secondary
+        } else if (sessionDate.isPresent()) {
+            Date date = sessionDate.get();
+            System.out.println(date);
+            List<Session> findBySessionDate = repo.searchSessionBySessionDate(sessionDate.get());
+            if (findBySessionDate.size() >= 1) {
+                return ResponseEntity.status(200).body(findBySessionDate);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-X1")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Sessions with session date = [%s] not found in database", sessionDate.get()))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
+
+            // Fallback to search all
         } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-X2")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Session with ID = [%s] not found in database", id))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
+            List<Session> findAll = repo.findAll();
+            if (findAll.size() >= 1) {
+                return ResponseEntity.status(200).body(findAll);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-X1")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message("No session found in database")
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
         }
     }
 
