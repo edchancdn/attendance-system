@@ -33,21 +33,21 @@ public class SessionController {
         return "create_Session";
     }
 
-    //method for handling the data coming from post request inside Create_Student form
+    //method for handling the data coming from post request inside Create_Sessions form
     @PostMapping("/sessions")
     public String savingSession(@ModelAttribute Session session){
-        //now  our form is filled with data we get student in request back, but we still need to save inside database
+        //now  our form is filled with data we get session request back, but we still need to save inside database
         sessionRepo.save(session);
-        //then returning the new view with created student
+        //then returning the new view with created  session
         return "redirect:/sessions";
     }
 
 
-    // handling method if someone pressed update from the Students page(Main Page)
+    // handling method if someone pressed update from the Sessions page(Main Page)
     @GetMapping("/session/edit/{id}")
     public String editSessionByID(@PathVariable("id") Long id, Model model){
         model.addAttribute("session",sessionRepo.findById(id).get());
-        // take your student and go to edit page and modify it.
+        // take your session and go to edit page and modify it.
         return "edit_Session";
     }
 
@@ -57,7 +57,7 @@ public class SessionController {
     public String editSessionByID( @ModelAttribute Session session, Model model){
         //Now this method received updated student from the user, we accessing it through the @ModelAttribute. Then, saving it inside the database.
         sessionRepo.save(session);
-        //returning to main page with updated student
+        //returning to main page with updated session
         model.addAttribute("session",sessionRepo.findAll());
         return "redirect:/session";
     }
