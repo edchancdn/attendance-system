@@ -1,29 +1,26 @@
 package co.pragra.attendancesystem.rest;
 
+import co.pragra.attendancesystem.controller.CohortController;
 import co.pragra.attendancesystem.entity.Cohort;
-import co.pragra.attendancesystem.entity.Student;
-import co.pragra.attendancesystem.repo.CohortRepo;
-import co.pragra.attendancesystem.rest.CohortApi;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Date;
-import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CohortApiTest {
+public class CohortControllerTest {
 
     @Autowired
-    private CohortApi controller;
+    private CohortController controller;
     private Cohort cohort1;
 
     @BeforeAll
     public void setUp() {
-        System.out.println("Unit test started for StudentApi.");
+        System.out.println("Unit test started for StudentController.");
         System.out.println("Running tests...");
     }
 
@@ -95,6 +92,6 @@ public class CohortApiTest {
     @AfterEach
     void tearDown() {
         System.out.println("Tests completed.");
-        System.out.println("Unit test ended for SessionApi.");
+        System.out.println("Unit test ended for SessionController.");
     }
 }

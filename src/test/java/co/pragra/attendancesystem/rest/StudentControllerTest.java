@@ -1,7 +1,7 @@
 package co.pragra.attendancesystem.rest;
 
+import co.pragra.attendancesystem.controller.StudentController;
 import co.pragra.attendancesystem.entity.Student;
-import co.pragra.attendancesystem.repo.StudentRepo;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,17 +13,17 @@ import java.util.Optional;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class StudentApiTest {
+public class StudentControllerTest {
 
     @Autowired
-    private StudentApi api;
+    private StudentController api;
     private Student tStudent = new Student();
     private static final String T_LASTNAME = "Smithfortesting";
     private static final String U_FIRSTNAME = "Frank";
 
     @BeforeAll
     public void setUp() {
-        System.out.println("Unit test started for StudentApi.");
+        System.out.println("Unit test started for StudentController.");
         System.out.println("Running tests...");
     }
 
@@ -89,6 +89,6 @@ public class StudentApiTest {
     @AfterAll
     public void tearDown() {
         System.out.println("Tests completed.");
-        System.out.println("Unit test ended for SessionApi.");
+        System.out.println("Unit test ended for SessionController.");
     }
 }

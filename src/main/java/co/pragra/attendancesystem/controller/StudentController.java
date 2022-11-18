@@ -1,73 +1,161 @@
 package co.pragra.attendancesystem.controller;
+
+import co.pragra.attendancesystem.dto.ErrorResponse;
 import co.pragra.attendancesystem.entity.Student;
 import co.pragra.attendancesystem.repo.StudentRepo;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
-@Controller
+// LINE BELOW IS FOR UNIT TESTING PURPOSES ONLY.
+@CrossOrigin(origins = "*")
+
+@RestController
+@RequestMapping("/api")
 public class StudentController {
+    private StudentRepo repo;
 
-    private StudentRepo studentRepo;
-
-    public StudentController(StudentRepo studentRepo) {
-        this.studentRepo = studentRepo;
+    public StudentController(StudentRepo repo) {
+        this.repo = repo;
     }
 
-    @GetMapping("/students")
-    public String getAllStudentList(Model model){
-        model.addAttribute("students",studentRepo.findAll());
-        return "students";
+    @GetMapping("/student")
+    public ResponseEntity<?> getStudent(
+            @RequestParam Optional<Long> id,
+            @RequestParam Optional<String> lastname) {
+
+        // ID is prioritized
+        // If both ID and Lastname have values, then only search by ID
+        if (id.isPresent()) {
+            Optional<Student> studentOptional = repo.findById(id.get());
+            if (studentOptional.isPresent()) {
+                return ResponseEntity.status(200).body(studentOptional.get());
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S2")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Student with ID = [%s] not found in database", id))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
+
+            // Lastname is secondary
+        } else if (lastname.isPresent()) {
+            List<Student> list = repo.searchStudentByLastName(lastname.get());
+            if (list.size() >= 1) {
+                return ResponseEntity.status(200).body(list);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S3")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Student with lastname = [%s] not found in database", lastname.get()))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
+
+            // Fallback to search all
+        } else {
+            List<Student> findAll = repo.findAll();
+            if (findAll.size() >= 1) {
+                return ResponseEntity.status(200).body(findAll);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S1")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message("No student found in database")
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
+        }
     }
 
-    @GetMapping ("/students/new")
-    public String creatNewStudent(Model model){
-        //creating empty student
-        Student student = new Student();
-        // then to add data into that by using form
-        model.addAttribute("student",student);
-        return "Create_Student";
+    @PostMapping("/student")
+    public ResponseEntity<?> createStudent(@RequestBody Student student) {
+        try {
+            Student save = repo.save(student);
+            return ResponseEntity.status(200).body(save);
+        } catch (Exception e) {
+            // LOG exception
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-S4")
+                    .errorCode(500)
+                    .dateTime(new Date())
+                    .message(String.format("Student not created"))
+                    .build();
+            return ResponseEntity.status(500).body(errorR);
+        }
     }
 
-
-    //method for handling the data coming from post request inside Create_Student form
-    @PostMapping("/students")
-    public String savingStudent(@ModelAttribute Student student){
-        //now  our form is filled with data we get student in request back, but we still need to save inside database
-        studentRepo.save(student);
-        //then returning the new view with created student
-        return "redirect:/students";
+    @PutMapping("/student")
+    public ResponseEntity<?> updateStudent(@RequestBody Student student) {
+        Optional<Student> byId = repo.findById(student.getId());
+        if (byId.isPresent()) {
+            try {
+                Student save = repo.save(student);
+                return ResponseEntity.status(200).body(save);
+            } catch (Exception e) {
+                // LOG exception
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S5")
+                        .errorCode(500)
+                        .dateTime(new Date())
+                        .message(String.format("Student not updated"))
+                        .build();
+                return ResponseEntity.status(500).body(errorR);
+            }
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-S5")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Student with ID = [%s] not found in database", student.getId()))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
     }
 
-
-    // handling method if someone pressed update from the Students page(Main Page)
-    @GetMapping("/students/edit/{id}")
-    public String editStudentByID(@PathVariable("id") Long id, Model model){
-        model.addAttribute("student",studentRepo.findById(id).get());
-        // take your student and go to edit page and modify it.
-        return "edit_Student";
+    @DeleteMapping("/student/{id}")
+    public ResponseEntity<?> deleteStudentById(@PathVariable Long id) {
+        Optional<Student> byId = repo.findById(id);
+        if (byId.isPresent()) {
+            try {
+                repo.deleteById(id);
+                if (!repo.findById(id).isPresent()) {
+                    return ResponseEntity.status(200).body(byId.get());
+                } else {
+                    ErrorResponse errorR = ErrorResponse.builder()
+                            .appId("AMS-S6")
+                            .errorCode(500)
+                            .dateTime(new Date())
+                            .message(String.format("Student not deleted"))
+                            .build();
+                    return ResponseEntity.status(500).body(errorR);
+                }
+            } catch (Exception e) {
+                // LOG exception
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-S6")
+                        .errorCode(500)
+                        .dateTime(new Date())
+                        .message(String.format("Student not deleted"))
+                        .build();
+                return ResponseEntity.status(500).body(errorR);
+            }
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-S6")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Student with ID = [%s] not found in database", id))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
     }
 
-
-    //handling post method after edit_Student
-    @PostMapping("/students/edit/{id}")
-    public String editStudentByID( @ModelAttribute Student student, Model model){
-        //Now this method received updated student from the user, we accessing it through the @ModelAttribute. Then, saving it inside the database.
-        studentRepo.save(student);
-        //returning to main page with updated student
-        model.addAttribute("students",studentRepo.findAll());
-        return "redirect:/students";
-    }
-
-
-    //when someone pressed delete button on main page, request get deleted here and repo get updated. returning the main page view.
-    @GetMapping("/students/delete/{id}")
-    public String deleteStudentByID(@PathVariable("id") Long id){
-        studentRepo.deleteById(id);
-        return "redirect:/students";
-    }
 }
