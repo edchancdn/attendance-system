@@ -1,5 +1,6 @@
 package co.pragra.attendancesystem.rest;
 
+import co.pragra.attendancesystem.controller.SessionController;
 import co.pragra.attendancesystem.entity.Session;
 import co.pragra.attendancesystem.entity.Student;
 import co.pragra.attendancesystem.repo.SessionRepo;
@@ -15,14 +16,14 @@ import java.util.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SessionApiTest {
+public class SessionControllerTest {
 
     @Autowired
     private SessionRepo repo;
     @Autowired
     private StudentRepo studentRepo;
     @Autowired
-    private SessionApi api;
+    private SessionController api;
     private Session tSession = new Session();
     private Long studentId1;
     private Long studentId2;
@@ -31,7 +32,7 @@ public class SessionApiTest {
 
     @BeforeAll
     public void setUp() {
-        System.out.println("Unit test started for SessionApi.");
+        System.out.println("Unit test started for SessionController.");
         System.out.println("Populating test data...");
         Student newSt1 = studentRepo.save(new Student().builder()
                 .firstName("Jane")
@@ -146,6 +147,6 @@ public class SessionApiTest {
             studentRepo.deleteById(studentId3);
         }
         System.out.println("Test data cleared.");
-        System.out.println("Unit test ended for SessionApi.");
+        System.out.println("Unit test ended for SessionController.");
     }
 }

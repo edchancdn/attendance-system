@@ -1,4 +1,4 @@
-package co.pragra.attendancesystem.rest;
+package co.pragra.attendancesystem.controller;
 
 import co.pragra.attendancesystem.dto.ErrorResponse;
 import co.pragra.attendancesystem.entity.Session;
@@ -13,18 +13,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+// LINE BELOW IS FOR UNIT TESTING PURPOSES ONLY.
+@CrossOrigin(origins = "*")
+
 @RestController
-public class SessionApi {
+@RequestMapping("/api")
+public class SessionController {
 
     private SessionRepo repo;
     private StudentRepo studentRepo;
 
-    public SessionApi(SessionRepo repo, StudentRepo studentRepo) {
+    public SessionController(SessionRepo repo, StudentRepo studentRepo) {
         this.repo = repo;
         this.studentRepo = studentRepo;
     }
 
-    @GetMapping("/api/session")
+    @GetMapping("/session")
     public ResponseEntity<?> getSession(
             @RequestParam Optional<Long> id,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<Date> sessionDate) {
@@ -79,7 +83,7 @@ public class SessionApi {
         }
     }
 
-    @PostMapping("/api/session")
+    @PostMapping("/session")
     public ResponseEntity<?> createSession(@RequestBody Session session) {
         try {
             Session save = repo.save(session);
@@ -96,7 +100,7 @@ public class SessionApi {
         }
     }
 
-    @PutMapping("/api/session")
+    @PutMapping("/session")
     public ResponseEntity<?> updateSession(@RequestBody Session session) {
         Optional<Session> byId = repo.findById(session.getId());
         if (byId.isPresent()) {
@@ -124,7 +128,7 @@ public class SessionApi {
         }
     }
 
-    @DeleteMapping("/api/session/{id}")
+    @DeleteMapping("/session/{id}")
     public ResponseEntity<?> deleteSessionById(@PathVariable Long id) {
         Optional<Session> byId = repo.findById(id);
         if (byId.isPresent()) {
@@ -161,7 +165,7 @@ public class SessionApi {
     Given a Session ID and a list of Student IDs,
     Add the corresponding students into existing session.attendedStudents.
     */
-    @PutMapping("/api/session/{sessionId}/student")
+    @PutMapping("/session/{sessionId}/student")
     public ResponseEntity<?> addStudentToSession(@RequestBody List<Long> students, @PathVariable Long sessionId) {
         // get the session to be updated
         Optional<Session> byId = repo.findById(sessionId);
@@ -219,7 +223,7 @@ public class SessionApi {
     Given a Session ID and a list of Student IDs
     Remove the corresponding students from existing session.attendedStudents
      */
-    @DeleteMapping("/api/session/{sessionId}/student")
+    @DeleteMapping("/session/{sessionId}/student")
     public ResponseEntity<?> deleteStudentFromSession(@RequestBody List<Long> students, @PathVariable Long sessionId) {
         // get the session to be updated
         Optional<Session> byId = repo.findById(sessionId);
