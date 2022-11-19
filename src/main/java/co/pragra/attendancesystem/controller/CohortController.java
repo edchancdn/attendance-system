@@ -28,50 +28,48 @@ public class CohortController {
     }
 
     @GetMapping("/cohort")
-    public ResponseEntity<?> getAllCohort(){
-        List<Cohort> findAll = repo.findAll();
-        if (findAll.size() >= 1) {
-            return ResponseEntity.status(200).body(findAll);
+    public ResponseEntity<?> getCohort(
+            @RequestParam Optional<Long> id,
+            @RequestParam Optional<String> name){
+        if (id.isPresent()) {
+            Optional<Cohort> cohortOptional = repo.findById(id.get());
+            if (cohortOptional.isPresent()) {
+                return ResponseEntity.status(200).body(cohortOptional.get());
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-C2")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Cohort with ID = [%s] not found in database", id))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
+        } else if (name.isPresent()) {
+            List<Cohort> list = repo.findCohortByName(name.get());
+            if (list.size() >= 1) {
+                return ResponseEntity.status(200).body(list);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-C3")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message(String.format("Cohort with name = [%s] not found in database", name))
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
         } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-C1")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message("No cohort found in database")
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
-        }
-    }
-
-    @GetMapping("/cohort/{id}")
-    public ResponseEntity<?> findCohortById(@PathVariable long id){
-        Optional<Cohort> cohortOptional = repo.findById(id);
-        if (cohortOptional.isPresent()) {
-            return ResponseEntity.status(200).body(cohortOptional.get());
-        } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-C2")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Cohort with ID = [%s] not found in database", id))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
-        }
-    }
-
-    @GetMapping("/cohort/name/{name}")
-    public ResponseEntity<?> findCohortByName(@PathVariable String name){
-        List<Cohort> list = repo.findCohortByName(name);
-        if (list.size() >= 1) {
-            return ResponseEntity.status(200).body(list);
-        } else {
-            ErrorResponse errorR = ErrorResponse.builder()
-                    .appId("AMS-C3")
-                    .errorCode(404)
-                    .dateTime(new Date())
-                    .message(String.format("Cohort with name = [%s] not found in database", name))
-                    .build();
-            return ResponseEntity.status(404).body(errorR);
+            List<Cohort> findAll = repo.findAll();
+            if (findAll.size() >= 1) {
+                return ResponseEntity.status(200).body(findAll);
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-C1")
+                        .errorCode(404)
+                        .dateTime(new Date())
+                        .message("No cohort found in database")
+                        .build();
+                return ResponseEntity.status(404).body(errorR);
+            }
         }
     }
 
