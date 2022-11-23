@@ -8,6 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
@@ -15,7 +17,7 @@ import java.util.Date;
 public class CohortControllerTest {
 
     @Autowired
-    private CohortController controller;
+    private CohortController api;
     private Cohort cohort1;
 
     @BeforeAll
@@ -33,7 +35,7 @@ public class CohortControllerTest {
                 .courseName("Front End Programming")
                 .startDate(new Date())
                 .endDate(new Date()).build();
-        ResponseEntity<?> createdCohort = controller.createCohort(cohort);
+        ResponseEntity<?> createdCohort = api.createCohort(cohort);
         Assertions.assertTrue(createdCohort.getStatusCodeValue() == 200);
         cohort1 = (Cohort) createdCohort.getBody();
         Assertions.assertTrue(cohort1.getName().equals(name));
@@ -42,7 +44,7 @@ public class CohortControllerTest {
     @Test
     @Order(2)
     void findCohortById() {
-        ResponseEntity<?> cohortId = controller.findCohortById(cohort1.getId());
+        ResponseEntity<?> cohortId = api.getCohort(Optional.ofNullable(cohort1.getId()), Optional.empty());
         Assertions.assertTrue(cohortId.getStatusCodeValue() == 200);
         Cohort responseBody = (Cohort) cohortId.getBody();
         Assertions.assertTrue(responseBody.getId() == cohort1.getId());
@@ -51,16 +53,16 @@ public class CohortControllerTest {
     @Test
     @Order(3)
     void findCohortByName() {
-        ResponseEntity<?> cohortId = controller.findCohortByName(cohort1.getName());
-        Assertions.assertTrue(cohortId.getStatusCodeValue() == 200);
-        Cohort responseBody = (Cohort) cohortId.getBody();
-        Assertions.assertTrue(responseBody.getName() == cohort1.getName());
+        ResponseEntity<?> cohortName = api.getCohort(Optional.empty(), Optional.ofNullable(cohort1.getName()));
+        Assertions.assertTrue(cohortName.getStatusCodeValue() == 200);
+        List<Cohort> responseBody = (List<Cohort>) cohortName.getBody();
+        Assertions.assertTrue(responseBody.get(0).getName().equals(cohort1.getName()));
     }
 
     @Test
     @Order(4)
     void findAllCohort() {
-        ResponseEntity<?> allCohorts = controller.getAllCohort();
+        ResponseEntity<?> allCohorts = api.getCohort(Optional.empty(), Optional.empty());
         Assertions.assertTrue(allCohorts.getStatusCodeValue() == 200);
     }
 
@@ -74,7 +76,7 @@ public class CohortControllerTest {
                 .startDate(cohort1.getStartDate())
                 .endDate(cohort1.getEndDate())
                 .courseName(cohort1.getCourseName()).build();
-        ResponseEntity<?> updateCohort = controller.updateCohort(cohort);
+        ResponseEntity<?> updateCohort = api.updateCohort(cohort);
         Assertions.assertTrue(updateCohort.getStatusCodeValue() == 200);
         Cohort responseBody = (Cohort) updateCohort.getBody();
         Assertions.assertTrue(responseBody.getName().equals(name));
@@ -83,9 +85,9 @@ public class CohortControllerTest {
     @Test
     @Order(6)
     void deleteCohortById() {
-        ResponseEntity<?> deleteCohortById = controller.deleteCohortById(cohort1.getId());
+        ResponseEntity<?> deleteCohortById = api.deleteCohortById(cohort1.getId());
         Assertions.assertTrue(deleteCohortById.getStatusCodeValue() == 200);
-        ResponseEntity<?> cohortById = controller.findCohortById(cohort1.getId());
+        ResponseEntity<?> cohortById = api.getCohort(Optional.ofNullable(cohort1.getId()), Optional.empty());
         Assertions.assertTrue(cohortById.getStatusCodeValue() == 404);
     }
 
