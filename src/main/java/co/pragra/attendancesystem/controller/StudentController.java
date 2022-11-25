@@ -133,17 +133,22 @@ public class StudentController {
                             .appId("AMS-S6")
                             .errorCode(500)
                             .dateTime(new Date())
-                            .message(String.format("Student not deleted"))
+                            .message(String.format("System exception encountered when trying to delete this student."))
                             .build();
                     return ResponseEntity.status(500).body(errorR);
                 }
             } catch (Exception e) {
                 // LOG exception
+                String errMsg = "System exception encountered when trying to delete this student.";
+                if (e.getMessage().contains("org.hibernate.exception.ConstraintViolationException:")) {
+                    errMsg = "This student is referenced by either a cohort or a session. " +
+                            "Remove references from any cohort or session, before deleting this student.";
+                }
                 ErrorResponse errorR = ErrorResponse.builder()
                         .appId("AMS-S6")
                         .errorCode(500)
                         .dateTime(new Date())
-                        .message(String.format("Student not deleted"))
+                        .message(errMsg)
                         .build();
                 return ResponseEntity.status(500).body(errorR);
             }
