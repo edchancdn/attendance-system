@@ -132,21 +132,37 @@ public class SessionController {
     public ResponseEntity<?> deleteSessionById(@PathVariable Long id) {
         Optional<Session> byId = repo.findById(id);
         if (byId.isPresent()) {
-            repo.deleteById(id);
-            if (!repo.findById(id).isPresent()) {
-                Session rSession = new Session();
-                rSession.setId(byId.get().getId());
-                rSession.setSessionDate(byId.get().getSessionDate());
-                rSession.setStartTime(byId.get().getStartTime());
-                rSession.setEndTime(byId.get().getEndTime());
-                rSession.setAttendedStudents(null);
-                return ResponseEntity.status(200).body(rSession);
-            } else {
+            try {
+                repo.deleteById(id);
+                if (!repo.findById(id).isPresent()) {
+                    Session rSession = new Session();
+                    rSession.setId(byId.get().getId());
+                    rSession.setSessionDate(byId.get().getSessionDate());
+                    rSession.setStartTime(byId.get().getStartTime());
+                    rSession.setEndTime(byId.get().getEndTime());
+                    rSession.setAttendedStudents(null);
+                    return ResponseEntity.status(200).body(rSession);
+                } else {
+                    ErrorResponse errorR = ErrorResponse.builder()
+                            .appId("AMS-X5")
+                            .errorCode(500)
+                            .dateTime(new Date())
+                            .message(String.format("System exception encountered when trying to delete this session."))
+                            .build();
+                    return ResponseEntity.status(500).body(errorR);
+                }
+            } catch (Exception e) {
+                // Log exception
+                String errMsg = "System exception encountered when trying to delete this session.";
+                if (e.getMessage().contains("org.hibernate.exception.ConstraintViolationException:")) {
+                    errMsg = "This session is referenced by a cohort. " +
+                            "Remove references from any cohort, before deleting this session.";
+                }
                 ErrorResponse errorR = ErrorResponse.builder()
                         .appId("AMS-X5")
                         .errorCode(500)
                         .dateTime(new Date())
-                        .message(String.format("Session not deleted"))
+                        .message(errMsg)
                         .build();
                 return ResponseEntity.status(500).body(errorR);
             }

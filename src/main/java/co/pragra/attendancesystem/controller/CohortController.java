@@ -5,6 +5,7 @@ import co.pragra.attendancesystem.entity.Cohort;
 import co.pragra.attendancesystem.entity.Session;
 import co.pragra.attendancesystem.entity.Student;
 import co.pragra.attendancesystem.repo.CohortRepo;
+import co.pragra.attendancesystem.repo.SessionRepo;
 import co.pragra.attendancesystem.repo.StudentRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +28,12 @@ public class CohortController {
     private CohortRepo repo;
 
     private StudentRepo studentRepo;
+    private SessionRepo sessionRepo;
 
-    public CohortController(CohortRepo repo, StudentRepo studentRepo) {
+    public CohortController(CohortRepo repo, StudentRepo studentRepo, SessionRepo sessionRepo) {
         this.repo = repo;
         this.studentRepo = studentRepo;
+        this.sessionRepo = sessionRepo;
     }
 
     @GetMapping("/cohort")
@@ -178,7 +181,7 @@ public class CohortController {
     public ResponseEntity<?> addStudentToCohort(
             @RequestBody List<Long> students,
             @PathVariable Long cohortId) {
-        // get the session to be updated
+        // get the cohort to be updated
         Optional<Cohort> byId = repo.findById(cohortId);
         if (byId.isPresent()) {
             if (students.size() > 0) {
@@ -282,6 +285,126 @@ public class CohortController {
         } else {
             ErrorResponse errorR = ErrorResponse.builder()
                     .appId("AMS-C8")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Cohort with ID = [%s] not found in database", cohortId))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
+    }
+
+    /*
+    Given a Cohort ID and a list of Session IDs,
+    Add the corresponding sessions into existing cohort.sessions
+    */
+    @PutMapping("/cohort/{cohortId}/session")
+    public ResponseEntity<?> addSessionToCohort(
+            @RequestBody List<Long> sessions,
+            @PathVariable Long cohortId) {
+        // get the cohort to be updated
+        Optional<Cohort> byId = repo.findById(cohortId);
+        if (byId.isPresent()) {
+            if (sessions.size() > 0) {
+                Cohort cohortToUpdate = byId.get();
+                // get the list to be updated
+                List<Session> listToUpdate = cohortToUpdate.getSessions();
+                for (Long sId: sessions) {
+                    // get the session to be added to the list
+                    Optional<Session> stById = sessionRepo.findById(sId);
+                    if (stById.isPresent()) {
+                        Session sessionAdd = stById.get();
+                        // check if session does not exist in the list
+                        if (!listToUpdate.contains(sessionAdd)) {
+                            listToUpdate.add(sessionAdd);
+                        }
+                    }
+                }
+                cohortToUpdate.setSessions(listToUpdate);
+                try {
+                    Cohort save = repo.save(cohortToUpdate);
+                    return ResponseEntity.status(200).body(save);
+                } catch (Exception e) {
+                    // LOG exception
+                    ErrorResponse errorR = ErrorResponse.builder()
+                            .appId("AMS-C9")
+                            .errorCode(500)
+                            .dateTime(new Date())
+                            .message(String.format("Session not added to cohort"))
+                            .build();
+                    return ResponseEntity.status(500).body(errorR);
+                }
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-C9")
+                        .errorCode(204)
+                        .dateTime(new Date())
+                        .message(String.format("Empty sessions list provided"))
+                        .build();
+                return ResponseEntity.status(204).body(errorR);
+            }
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C9")
+                    .errorCode(404)
+                    .dateTime(new Date())
+                    .message(String.format("Cohort with ID = [%s] not found in database", cohortId))
+                    .build();
+            return ResponseEntity.status(404).body(errorR);
+        }
+    }
+
+    /*
+    Given a Cohort ID and a list of Session IDs
+    Remove the corresponding session from existing cohort.sessions
+     */
+    @DeleteMapping("/cohort/{cohortId}/session")
+    public ResponseEntity<?> deleteSessionFromCohort(
+            @RequestBody List<Long> sessions,
+            @PathVariable Long cohortId) {
+        // get the cohort to be updated
+        Optional<Cohort> byId = repo.findById(cohortId);
+        if (byId.isPresent()) {
+            if (sessions.size() > 0) {
+                Cohort cohortToUpdate = byId.get();
+                // get the list to be updated
+                List<Session> listToUpdate = cohortToUpdate.getSessions();
+                for (Long sId: sessions) {
+                    // get the session to be removed from the list
+                    Optional<Session> stById = sessionRepo.findById(sId);
+                    if (stById.isPresent()) {
+                        Session sessionRemove = stById.get();
+                        // check if session exist in the list
+                        if (listToUpdate.contains(sessionRemove)) {
+                            listToUpdate.remove(sessionRemove);
+                        }
+                    }
+                }
+                cohortToUpdate.setSessions(listToUpdate);
+                try {
+                    Cohort save = repo.save(cohortToUpdate);
+                    return ResponseEntity.status(200).body(save);
+                } catch (Exception e) {
+                    // LOG exception
+                    ErrorResponse errorR = ErrorResponse.builder()
+                            .appId("AMS-C10")
+                            .errorCode(500)
+                            .dateTime(new Date())
+                            .message(String.format("Session not removed from cohort"))
+                            .build();
+                    return ResponseEntity.status(500).body(errorR);
+                }
+            } else {
+                ErrorResponse errorR = ErrorResponse.builder()
+                        .appId("AMS-C10")
+                        .errorCode(204)
+                        .dateTime(new Date())
+                        .message(String.format("Empty sessions list provided"))
+                        .build();
+                return ResponseEntity.status(204).body(errorR);
+            }
+        } else {
+            ErrorResponse errorR = ErrorResponse.builder()
+                    .appId("AMS-C10")
                     .errorCode(404)
                     .dateTime(new Date())
                     .message(String.format("Cohort with ID = [%s] not found in database", cohortId))
